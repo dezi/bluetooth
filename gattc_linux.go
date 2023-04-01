@@ -255,13 +255,12 @@ func (c DeviceCharacteristic) DisableNotifications() error {
 
 	println("############################# close watch channel")
 
-	close(pfusch)
-
 	err := c.characteristic.UnwatchProperties(pfusch)
 	if err != nil {
 		return err
 	}
 
+	close(pfusch)
 	pfusch = nil
 
 	return c.characteristic.StopNotify()
