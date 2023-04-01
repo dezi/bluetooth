@@ -261,8 +261,6 @@ func (c DeviceCharacteristic) DisableNotifications() error {
 	}
 
 	err = c.characteristic.StopNotify()
-
-	close(pfusch)
 	pfusch = nil
 
 	return err
