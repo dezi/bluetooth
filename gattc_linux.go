@@ -246,16 +246,17 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (wc
 	return
 }
 
-func (c DeviceCharacteristic) DisableNotifications() error {
+func (c DeviceCharacteristic) DisableNotifications(watchChannel interface{}) error {
 
-	if c.watchChannel == nil {
+	if watchChannel == nil {
 		return nil
 	}
 
-	close(c.watchChannel)
+	wc := chan *bluez.PropertyChanged(watchChannel)
+	close(wc)
 	println("############################# close watch channel")
 
-	err := c.characteristic.UnwatchProperties(c.watchChannel)
+	err := c.characteristic.UnwatchProperties(wc)
 	if err != nil {
 		return err
 	}
