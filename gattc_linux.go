@@ -248,6 +248,8 @@ func (c DeviceCharacteristic) DisableNotifications() error {
 		return nil
 	}
 
+	close(c.watchChannel)
+
 	err := c.characteristic.UnwatchProperties(c.watchChannel)
 	if err != nil {
 		return err
