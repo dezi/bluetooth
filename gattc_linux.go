@@ -211,7 +211,7 @@ func (s *DeviceService) DiscoverCharacteristics(uuids []UUID) ([]DeviceCharacter
 // call will return before all data has been written. A limited number of such
 // writes can be in flight at any given time. This call is also known as a
 // "write command" (as opposed to a write request).
-func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) {
+func (c *DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) {
 	err = c.characteristic.WriteValue(p, nil)
 	if err != nil {
 		return 0, err
@@ -223,7 +223,7 @@ func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) 
 // Configuration Descriptor (CCCD). This means that most peripherals will send a
 // notification with a new value every time the value of the characteristic
 // changes.
-func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (err error) {
+func (c *DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (err error) {
 
 	pfusch, err = c.characteristic.WatchProperties()
 	if err != nil {
@@ -247,13 +247,11 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (er
 
 var pfusch chan *bluez.PropertyChanged
 
-func (c DeviceCharacteristic) DisableNotifications() error {
+func (c *DeviceCharacteristic) DisableNotifications() error {
 
 	if pfusch == nil {
 		return nil
 	}
-
-	println("############################# close watch channel")
 
 	err := c.characteristic.UnwatchProperties(pfusch)
 	if err != nil {
