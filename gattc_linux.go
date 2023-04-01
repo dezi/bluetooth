@@ -225,14 +225,14 @@ func (c *DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error)
 // changes.
 func (c *DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (err error) {
 
-	pfusch, err = c.characteristic.WatchProperties()
+	c.watchChannel, err = c.characteristic.WatchProperties()
 	if err != nil {
 		return
 	}
 
 	go func() {
 		println("############################# go func start")
-		for update := range pfusch {
+		for update := range c.watchChannel {
 			if update != nil && update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
 				println("############################# go func call")
 				callback(update.Value.([]byte))
@@ -245,21 +245,18 @@ func (c *DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (e
 	return
 }
 
-var pfusch chan *bluez.PropertyChanged
-
 func (c *DeviceCharacteristic) DisableNotifications() error {
 
-	if pfusch == nil {
+	if c.watchChannel == nil {
 		return nil
 	}
 
-	err := c.characteristic.UnwatchProperties(pfusch)
+	err := c.characteristic.UnwatchProperties(c.watchChannel)
 	if err != nil {
 		return err
 	}
 
 	err = c.characteristic.StopNotify()
-	pfusch = nil
 
 	return err
 }
