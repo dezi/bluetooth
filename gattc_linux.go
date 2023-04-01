@@ -242,7 +242,7 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) err
 	return c.characteristic.StartNotify()
 }
 
-func (c DeviceCharacteristic) DisableNotifications(callback func(buf []byte)) error {
+func (c DeviceCharacteristic) DisableNotifications() error {
 
 	if c.watchChannel == nil {
 		return nil
