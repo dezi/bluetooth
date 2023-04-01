@@ -224,11 +224,13 @@ func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) 
 // notification with a new value every time the value of the characteristic
 // changes.
 func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) error {
+
 	var err error
 	c.watchChannel, err = c.characteristic.WatchProperties()
 	if err != nil {
 		return err
 	}
+
 	go func() {
 		for update := range c.watchChannel {
 			if update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
@@ -236,22 +238,22 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) err
 			}
 		}
 	}()
+
 	return c.characteristic.StartNotify()
 }
 
 func (c DeviceCharacteristic) DisableNotifications(callback func(buf []byte)) error {
-	ch, err := c.characteristic.WatchProperties()
+
+	if c.watchChannel == nil {
+		return
+	}
+
+	ch, err := c.characteristic.UnwatchProperties(c.watchChannel)
 	if err != nil {
 		return err
 	}
-	go func() {
-		for update := range ch {
-			if update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
-				callback(update.Value.([]byte))
-			}
-		}
-	}()
-	return c.characteristic.StartNotify()
+
+	return c.characteristic.StopNotify()
 }
 
 // Read reads the current characteristic value.
