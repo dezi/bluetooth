@@ -223,7 +223,7 @@ func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) 
 // Configuration Descriptor (CCCD). This means that most peripherals will send a
 // notification with a new value every time the value of the characteristic
 // changes.
-func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) error {
+func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (wc interface{}, err error) {
 
 	var err error
 	c.watchChannel, err = c.characteristic.WatchProperties()
@@ -242,6 +242,7 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) err
 		println("############################# go func done")
 	}()
 
+	wc = c.watchChannel
 	return c.characteristic.StartNotify()
 }
 
