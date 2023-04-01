@@ -232,11 +232,14 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) err
 	}
 
 	go func() {
+		println("############################# go func start")
 		for update := range c.watchChannel {
 			if update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
+				println("############################# go func call")
 				callback(update.Value.([]byte))
 			}
 		}
+		println("############################# go func done")
 	}()
 
 	return c.characteristic.StartNotify()
@@ -249,6 +252,7 @@ func (c DeviceCharacteristic) DisableNotifications() error {
 	}
 
 	close(c.watchChannel)
+	println("############################# close watch channel")
 
 	err := c.characteristic.UnwatchProperties(c.watchChannel)
 	if err != nil {
