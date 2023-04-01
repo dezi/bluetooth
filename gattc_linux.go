@@ -225,10 +225,9 @@ func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) 
 // changes.
 func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (wc interface{}, err error) {
 
-	var err error
 	c.watchChannel, err = c.characteristic.WatchProperties()
 	if err != nil {
-		return err
+		return
 	}
 
 	go func() {
@@ -243,7 +242,8 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (wc
 	}()
 
 	wc = c.watchChannel
-	return c.characteristic.StartNotify()
+	err = c.characteristic.StartNotify()
+	return
 }
 
 func (c DeviceCharacteristic) DisableNotifications() error {
