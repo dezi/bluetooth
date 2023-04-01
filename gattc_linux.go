@@ -233,7 +233,7 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (er
 	go func() {
 		println("############################# go func start")
 		for update := range pfusch {
-			if update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
+			if update != nil && update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
 				println("############################# go func call")
 				callback(update.Value.([]byte))
 			}
