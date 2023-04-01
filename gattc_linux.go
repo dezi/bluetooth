@@ -245,7 +245,7 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) err
 func (c DeviceCharacteristic) DisableNotifications(callback func(buf []byte)) error {
 
 	if c.watchChannel == nil {
-		return
+		return nil
 	}
 
 	ch, err := c.characteristic.UnwatchProperties(c.watchChannel)
