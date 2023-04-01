@@ -124,7 +124,7 @@ func (d *Device) DiscoverServices(uuids []UUID) ([]DeviceService, error) {
 // device.
 type DeviceCharacteristic struct {
 	uuidWrapper
-
+	watchChannel   chan *bluez.PropertyChanged
 	characteristic *gatt.GattCharacteristic1
 }
 
@@ -224,6 +224,21 @@ func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) 
 // notification with a new value every time the value of the characteristic
 // changes.
 func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) error {
+	c.watchChannel, err = c.characteristic.WatchProperties()
+	if err != nil {
+		return err
+	}
+	go func() {
+		for update := range c.watchChannel {
+			if update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
+				callback(update.Value.([]byte))
+			}
+		}
+	}()
+	return c.characteristic.StartNotify()
+}
+
+func (c DeviceCharacteristic) DisableNotifications(callback func(buf []byte)) error {
 	ch, err := c.characteristic.WatchProperties()
 	if err != nil {
 		return err
