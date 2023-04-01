@@ -264,6 +264,8 @@ func (c DeviceCharacteristic) DisableNotifications() error {
 
 	close(pfusch)
 	pfusch = nil
+
+	return err
 }
 
 // Read reads the current characteristic value.
