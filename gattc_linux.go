@@ -260,10 +260,10 @@ func (c DeviceCharacteristic) DisableNotifications() error {
 		return err
 	}
 
+	err = c.characteristic.StopNotify()
+
 	close(pfusch)
 	pfusch = nil
-
-	return c.characteristic.StopNotify()
 }
 
 // Read reads the current characteristic value.
