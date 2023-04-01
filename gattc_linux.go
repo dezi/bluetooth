@@ -223,16 +223,16 @@ func (c DeviceCharacteristic) WriteWithoutResponse(p []byte) (n int, err error) 
 // Configuration Descriptor (CCCD). This means that most peripherals will send a
 // notification with a new value every time the value of the characteristic
 // changes.
-func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (wc interface{}, err error) {
+func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (err error) {
 
-	c.watchChannel, err = c.characteristic.WatchProperties()
+	pfusch, err = c.characteristic.WatchProperties()
 	if err != nil {
 		return
 	}
 
 	go func() {
 		println("############################# go func start")
-		for update := range c.watchChannel {
+		for update := range pfusch {
 			if update.Interface == "org.bluez.GattCharacteristic1" && update.Name == "Value" {
 				println("############################# go func call")
 				callback(update.Value.([]byte))
@@ -241,25 +241,28 @@ func (c DeviceCharacteristic) EnableNotifications(callback func(buf []byte)) (wc
 		println("############################# go func done")
 	}()
 
-	wc = c.watchChannel
 	err = c.characteristic.StartNotify()
 	return
 }
 
-func (c DeviceCharacteristic) DisableNotifications(watchChannel interface{}) error {
+var pfusch chan *bluez.PropertyChanged
 
-	if watchChannel == nil {
+func (c DeviceCharacteristic) DisableNotifications() error {
+
+	if pfusch == nil {
 		return nil
 	}
 
-	wc := chan *bluez.PropertyChanged(watchChannel)
-	close(wc)
 	println("############################# close watch channel")
 
-	err := c.characteristic.UnwatchProperties(wc)
+	close(pfusch)
+
+	err := c.characteristic.UnwatchProperties(pfusch)
 	if err != nil {
 		return err
 	}
+
+	pfusch = nil
 
 	return c.characteristic.StopNotify()
 }
