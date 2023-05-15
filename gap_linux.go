@@ -172,7 +172,10 @@ func (a *Adapter) Scan(callback func(*Adapter, ScanResult)) error {
 			// to check for signals that are relevant to us.
 			switch sig.Name {
 			case "org.freedesktop.DBus.ObjectManager.InterfacesAdded":
-				objectPath := sig.Body[0].(dbus.ObjectPath)
+				objectPath, ok1 := sig.Body[0].(dbus.ObjectPath)
+				if !ok {
+					continue
+				}
 				interfaces := sig.Body[1].(map[string]map[string]dbus.Variant)
 				rawprops, ok := interfaces["org.bluez.Device1"]
 				if !ok {
